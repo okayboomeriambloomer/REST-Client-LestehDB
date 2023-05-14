@@ -7,11 +7,11 @@
 <body>
 
 <button>
-  <a th:href="@{/core/deb.php/text(fdate=${fdate},sdate=${sdate})}">Посмотреть в браузере</a>
+  <a th:href="@{/core/deb.php/text(fdate=${fdate},sdate=${sdate},serverName=${serverName})}">Посмотреть в браузере</a>
 </button>
 <br><br>
 <button>
-  <a th:href="@{/core/deb.php/text(fdate=${fdate},sdate=${sdate})}" download="log.txt" >Скачать json</a>
+  <a th:href="@{/core/deb.php/text(fdate=${fdate},sdate=${sdate},serverName=${serverName})}" download="log.txt" >Скачать json</a>
 </button>
 </form>
 </body>

@@ -5,12 +5,13 @@
     <title>Title</title>
 </head>
 <body>
-<form th:object="${time}" th:action="@{/core/deb.php/log.csv}" th:method="get">
+<form th:action="@{/core/deb.php/log.csv}" th:method="get">
+    <input type="hidden" name="serverName" th:value="${serverName}">
     <input type="hidden" name="fdate" th:value="${fdate}">
     <input type="hidden" name="sdate" th:value="${sdate}">
     <label for="dropDownList">Выберите прибор:</label>
-    <select id="dropDownList" th:name="deviceName">
-        <option th:each="device : ${devices}" th:value="${device}" th:text="${device}"></option>
+    <select id="dropDownList" th:name="deviceId">
+        <option th:each="entry : ${devices.entrySet()}" th:value="${entry.getKey()}" th:text="${entry.getValue()}"></option>
     </select>
     <br>
     <div>

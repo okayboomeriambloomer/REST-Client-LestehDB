@@ -30,6 +30,7 @@ public class DataController {
     public ResponseEntity<String> insertOne(@RequestBody LinkedHashMap<String, LinkedHashMap<String, String>> allData) {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.postForObject("http://localhost:8080/core/jsonapp.php", allData, Map.class);
+        // TODO: сюды надо добавить ещё два постФорОбжект для Чернышовской и Родионовской базы
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
@@ -43,16 +44,16 @@ public class DataController {
     public String getDataBetween(@RequestParam("fdate") String fdate,
                                  @RequestParam("sdate") String sdate,
                                  @RequestParam("jsonOrCsv") Boolean jsonOrCsv,
+                                 @RequestParam("serverName") String serverName,
                                  Model model) {
+        model.addAttribute("serverName", serverName);
         model.addAttribute("fdate", fdate);
         model.addAttribute("sdate", sdate);
         if (jsonOrCsv) {
             return "apifilebackJSON";
         } else {
-            model.addAttribute("fdate", fdate);
-            model.addAttribute("sdate", sdate);
             RestTemplate restTemplate = new RestTemplate();
-            List<?> allDevice = restTemplate.getForObject("http://localhost:8080/core/devices", List.class);
+            Map<?, ?> allDevice = restTemplate.getForObject("http://localhost:8080/core/devices", Map.class); // запрос к монговской базе за листом приборов
             model.addAttribute("devices", allDevice);
             return "apifilebackCSV";
         }
@@ -62,14 +63,15 @@ public class DataController {
                                                          LocalDateTime fdate,
                                                      @RequestParam("sdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                         LocalDateTime sdate,
-                                                     @RequestParam("deviceName") String deviceName) {
+                                                     @RequestParam("deviceId") Long deviceId,
+                                                     @RequestParam("serverName") String serverName) {
         RestTemplate restTemplate = new RestTemplate();
         String result = restTemplate.getForObject(
-                "http://localhost:8080/core/deb.php/log.csv?fdate={fdate}&sdate={sdate}&deviceName={deviceName}",
+                "http://" + serverName + "/core/deb.php?fdate={fdate}&sdate={sdate}&manualmode=1&unitid={deviceId}",
                 String.class,
                 fdate,
                 sdate,
-                deviceName);
+                deviceId);
 
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=log.csv")
@@ -84,9 +86,11 @@ public class DataController {
             (@RequestParam("fdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                 LocalDateTime fdate,
              @RequestParam("sdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                LocalDateTime sdate) {
+                LocalDateTime sdate,
+             @RequestParam("serverName") String serverName) {
         RestTemplate restTemplate = new RestTemplate();
-        String result = restTemplate.getForObject("http://localhost:8080/core/deb.php/text?fdate={fdate}&sdate={sdate}",
+        String result = restTemplate.getForObject("http://" + serverName + "/core/deb.php?fdate={fdate}" +
+                        "&sdate={sdate}&fileback=1",
                 String.class,
                 fdate,
                 sdate);
