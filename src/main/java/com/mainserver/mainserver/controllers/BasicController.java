@@ -33,7 +33,7 @@ public class BasicController {
         Map<String, String> map = new LinkedHashMap<>();
         map.put("localhost:8080", "MongoDB");
         map.put("localhost:8079", "MariaDB");
-        map.put("localhost:8078", "MySQL");
+        map.put("dbrobo.mgul.ac.ru", "MySQL");
         model.addAttribute("servers", map);
         return "chooseServer";
     }

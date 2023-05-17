@@ -5,13 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -30,7 +31,8 @@ public class DataController {
     public ResponseEntity<String> insertOne(@RequestBody LinkedHashMap<String, LinkedHashMap<String, String>> allData) {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.postForObject("http://localhost:8080/core/jsonapp.php", allData, Map.class);
-        // TODO: сюды надо добавить ещё два постФорОбжект для Чернышовской и Родионовской базы
+        restTemplate.postForObject("http://dbrobo.mgul.ac.ru/core/jsonapp.php", allData, Map.class);
+        // TODO: сюды надо добавить ещё постФорОбжект для Родионовской базы
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
@@ -81,19 +83,22 @@ public class DataController {
     }
 
     @GetMapping(value = "/deb.php/text") //
-    @ResponseBody
-    public String loadDataBetweenTextJSON
+    public ModelAndView loadDataBetweenTextJSON
             (@RequestParam("fdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                 LocalDateTime fdate,
              @RequestParam("sdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                 LocalDateTime sdate,
-             @RequestParam("serverName") String serverName) {
+             @RequestParam("serverName") String serverName,
+             ModelMap model) {
         RestTemplate restTemplate = new RestTemplate();
-        String result = restTemplate.getForObject("http://" + serverName + "/core/deb.php?fdate={fdate}" +
-                        "&sdate={sdate}&fileback=1",
-                String.class,
-                fdate,
-                sdate);
-        return result;
+//        String result = restTemplate.getForObject("http://" + serverName + "/core/deb.php?fdate={fdate}" +
+//                        "&sdate={sdate}&fileback=1",
+//                String.class,
+//                fdate,
+//                sdate);
+        model.addAttribute("fdate", fdate);
+        model.addAttribute("sdate", sdate);
+        return new ModelAndView("redirect:" + "http://" + serverName + "/core/deb.php?fdate={fdate}" +
+                        "&sdate={sdate}&fileback=1", model);
     }
 }
