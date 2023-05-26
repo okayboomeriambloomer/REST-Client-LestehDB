@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-<form th:action="@{/mainexport}" th:method="get">
+<form th:action="${urlPurpose}" th:method="get">
     <label for="dropDownList">Выберите сервер, с которого хотите забрать данные:</label>
     <select id="dropDownList" th:name="serverName">
       <option th:each="entry : ${servers.entrySet()}" th:value="${entry.getKey()}" th:text="${entry.getValue()}"></option>

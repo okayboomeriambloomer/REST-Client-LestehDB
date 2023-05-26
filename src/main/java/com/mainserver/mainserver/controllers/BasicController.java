@@ -22,19 +22,25 @@ public class BasicController {
     }
 
     @GetMapping("/debug")
-    public ResponseEntity<?> getDebugPage() {
+    public ResponseEntity<?> getDebugPage(@RequestParam("serverName") String serverName) {
         RestTemplate restTemplate = new RestTemplate();
-        String answer = restTemplate.getForObject("http://localhost:8080/core", String.class);
+        String answer = null;
+        if (serverName.equals("localhost:8080")) // FIXME: ну это никуда не годится..
+            answer = restTemplate.getForObject("http://localhost:8080/core", String.class);
+        if (serverName.equals("dbrobo.mgul.ac.ru"))
+            answer = restTemplate.getForObject("http://dbrobo.mgul.ac.ru/conn.php", String.class);
+        
         return new ResponseEntity<>(answer, HttpStatus.OK);
     }
 
     @GetMapping("/chooseServer")
-    public String getChooseServerPage(Model model) {
+    public String getChooseServerPage(@RequestParam("urlPurpose") String urlPurpose, Model model) {
         Map<String, String> map = new LinkedHashMap<>();
         map.put("localhost:8080", "MongoDB");
         map.put("localhost:8079", "MariaDB");
         map.put("dbrobo.mgul.ac.ru", "MySQL");
         model.addAttribute("servers", map);
+        model.addAttribute("urlPurpose", "\\" + urlPurpose);
         return "chooseServer";
     }
 

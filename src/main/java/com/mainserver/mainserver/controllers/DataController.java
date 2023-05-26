@@ -68,12 +68,18 @@ public class DataController {
                                                      @RequestParam("deviceId") Long deviceId,
                                                      @RequestParam("serverName") String serverName) {
         RestTemplate restTemplate = new RestTemplate();
-        String result = restTemplate.getForObject(
-                "http://" + serverName + "/core/deb.php?fdate={fdate}&sdate={sdate}&manualmode=1&unitid={deviceId}",
-                String.class,
-                fdate,
-                sdate,
-                deviceId);
+        String result;
+
+        if (serverName.equals("dbrobo.mgul.ac.ru")) {
+            result = restTemplate.getForObject("http://" + serverName + "/export/last_export.csv", String.class);
+        } else {
+            result = restTemplate.getForObject(
+                    "http://" + serverName + "/core/deb.php?fdate={fdate}&sdate={sdate}&manualmode=1&unitid={deviceId}",
+                    String.class,
+                    fdate,
+                    sdate,
+                    deviceId);
+        }
 
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=log.csv")
@@ -82,8 +88,9 @@ public class DataController {
                 .body(result);
     }
 
-    @GetMapping(value = "/deb.php/text") //
-    public ModelAndView loadDataBetweenTextJSON
+    @GetMapping(value = "/deb.php/text")
+    @ResponseBody
+    public String loadDataBetweenTextJSON
             (@RequestParam("fdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                 LocalDateTime fdate,
              @RequestParam("sdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -91,14 +98,18 @@ public class DataController {
              @RequestParam("serverName") String serverName,
              ModelMap model) {
         RestTemplate restTemplate = new RestTemplate();
-//        String result = restTemplate.getForObject("http://" + serverName + "/core/deb.php?fdate={fdate}" +
-//                        "&sdate={sdate}&fileback=1",
-//                String.class,
-//                fdate,
-//                sdate);
         model.addAttribute("fdate", fdate);
         model.addAttribute("sdate", sdate);
-        return new ModelAndView("redirect:" + "http://" + serverName + "/core/deb.php?fdate={fdate}" +
-                        "&sdate={sdate}&fileback=1", model);
+        if (serverName.equals("dbrobo.mgul.ac.ru")) {
+            String result = restTemplate.getForObject("http://" + serverName + "/export/log.txt", String.class);
+            return result;
+        } else {
+            String result = restTemplate.getForObject("http://" + serverName + "/core/deb.php?fdate={fdate}" +
+                        "&sdate={sdate}&fileback=1",
+                String.class,
+                fdate,
+                sdate);
+            return result;
+        }
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
@@ -30,9 +31,9 @@ public class AuthProviderImpl implements AuthenticationProvider {
         RestTemplate restTemplate = new RestTemplate();
             String ans = restTemplate.getForObject("http://localhost:8080/admin/checkout?username={username}&password={password}",
                     String.class, authentication.getName(), authentication.getCredentials());
-            System.out.println(ans);
             if (ans.equals("Ok")) return new UsernamePasswordAuthenticationToken(authentication.getName(),
-                    authentication.getCredentials(), Collections.emptyList());
+                    // FIXME
+                    authentication.getCredentials(), Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
             else if (ans.equals("password")) throw new UsernameNotFoundException("Wrong password");
             else if (ans.equals("name")) throw new UsernameNotFoundException("Admins with this name not found");
         return null;
